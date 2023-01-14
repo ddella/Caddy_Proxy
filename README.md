@@ -79,7 +79,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `ddella`, `Caddy_Proxy`, `twitter_handle`, `daniel-della-noce-2176b622`, `email_client`, `email`, `project_title`, `project_description`
+This is an example of *Caddy* as a Docker container used as a reverse proxy. The idea was to give an external partner access to a service in our network. The partner hits the Caddy container and he's redirected to another site internally.  
+
+The external partner is accessing REST API on an internal server. In a future release I will deploy another NGINX server as an API gateway to add an extra layer of security.  
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -92,13 +94,10 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 <!-- GETTING STARTED -->
 ## Getting Started
-
-This is an example of *Caddy* as a Docker container used as a reverse proxy. The idea was to give an external partner access to a service in our network. The partner hits the Caddy container and he's redirected to another site internally. Our partner is using REST API on an internal server.  
-
-The next step would be to deploy NGINX as an API gateway to add an extra layer of security.  
 ### Prerequisites
-I needed a container with a small web server. I used a container that I had build some time ago. It's a container with Nginx and PHP8 with the famous **phpinfo()** page. You can use anything you want.  
-[Nginx with PHP8](https://github.com/ddella/PHP8-Nginx)
+I needed a container with a small web server. I used a container that I had build some time ago with Nginx and PHP8 that you can find [here](https://github.com/ddella/PHP8-Nginx). It has the famous **phpinfo()** page.  
+>You can use anything you want.  
+
 ### Diagram
 ![Diagram](images/design.jpg)
 
