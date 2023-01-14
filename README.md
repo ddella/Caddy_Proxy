@@ -85,7 +85,7 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
-* ![Docker Pulls](https://img.shields.io/docker/pulls/_/caddy)
+* ![Caddy Pulls](https://img.shields.io/docker/pulls/_/caddy)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
