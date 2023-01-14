@@ -31,13 +31,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/ddella/Caddy_Proxy">
-    <img src="/images/logo.jpg" alt="Logo">
+    <img src="images/logo.jpg" alt="Logo">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">Caddy + Docker</h3>
 
   <p align="center">
-    project_description
+    This is a simple example of a Caddy Docker container used a reverse proxy. I used this as part of a proof of concept to give and external partner access to a service inside our network.
     <br />
     <a href="https://github.com/ddella/Caddy_Proxy"><strong>Explore the docs »</strong></a>
     <br />
@@ -49,8 +49,6 @@
     <a href="https://github.com/ddella/Caddy_Proxy/issues">Request Feature</a>
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -78,18 +76,14 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
+Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `ddella`, `Caddy_Proxy`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 ### Built With
 
@@ -105,102 +99,122 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+This is an example of *Caddy* as a Docker container used as a reverse proxy. The idea was to give an external partner access to a service in our network. The partner hits the Caddy container and he's redirected to another site internally. Our partner is using REST API on an internal server.  
 
+The next step would be to deploy NGINX as an API gateway to add an extra layer of security.  
 ### Prerequisites
+I needed a container with a small web server. I used a container that I had build some time ago. It's a container with Nginx and PHP8 with the famous **phpinfo()** page. You can use anything you want.  
+[Nginx with PHP8](https://github.com/ddella/PHP8-Nginx)
+### Diagram
+![Diagram](images/design.jpg)
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+- I run a Docker container called **web** for a simple web server.
+  - It listens to `TCP/80` and `TCP/443`
+- I run a Docker container called **caddy** for the reverse proxy.
+  - It listens to `TCP/80`, `TCP/443`, `TCP/2080`, `TCP/4080` and `TCP/3080`
+- I also run an external Apache web server on the Docker host.
+  - It listens to `TCP/80`
 
+### Traffic flow
+This example is for educational purposes **ONLY**. It shows different scenarios where you want to use a reverse proxy.  
+
+- `TCP/9080` on Docker host is mapped to `TCP/80` on the **web** container
+- `TCP/9443` on Docker host is mapped to `TCP/443` on the **web** container
+
+- `TCP/8080` on Docker host is mapped to `TCP/80` on the **caddy** container
+- `TCP/8443` on Docker host is mapped to `TCP/443` on the **caddy** container
+
+So far it's pretty boring and there's nothing special here.  
+
+- `TCP/2080` on Docker host is mapped to `TCP/2080` on the **caddy** container, which reverse proxy to the **web** container `TCP/80`
+- `TCP/3080` on Docker host is mapped to `TCP/3080` on the **caddy** container, which reverse proxy to an external server `TCP/80`
+- `TCP/4080` on Docker host is mapped to `TCP/4080` on the **caddy** container, which reverse proxy to the Docker host `TCP/80`
+
+This last two are the most interesting. It shows that you could give access to an external partner at a Docker container that will redirect the traffic to another server. 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/ddella/Caddy_Proxy.git
+1. get the official Caddy container for Docker Hub
+    ```shell
+    docker pull caddy
+    ```
+2. get another container for testing (optionnal)
+   ```shell
+   git clone https://github.com/ddella/PHP8-Nginx.git
    ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Create a configuration file called `Caddyfile`  
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+    # Example of a "Caddyfile"
+    :80 {
+      # Set this path to your site's directory.
+      root * /usr/share/caddy
+
+      # Enable the static file server.
+      file_server
+    }
+
+    :2080 {
+      # Reverse proxy from Caddy container to another container
+      reverse_proxy http://web
+    }
+
+    :3080 {
+      # Reverse proxy from Caddy container to a server external to the Docker host
+      reverse_proxy http://192.168.1.55
+    }
+
+    :4080 {
+      # Reverse proxy from Caddy container to the Docker host Apache web server
+      reverse_proxy http://192.168.1.104
+    }
+
+1. ### Start the `caddy` container:
+The default config file simply serves files from `/usr/share/caddy`,
+I added a volume to serve `index.html` from the current working directory:
+```shell
+docker run --rm -d -p 8080:80 -p 2080:2080 -p 3080:3080 -p 4080:4080 \
+-v $PWD/index.html:/usr/share/caddy/index.html \
+-v $PWD/Caddyfile:/etc/caddy/Caddyfile \
+-v caddy_data:/data \
+--name caddy \
+--network frontend \
+caddy
+```
+2. ### Start a simple web server to test the reverse proxy of Caddy
+This could be any container with a web server. I happened to have one with Nginx and PHP8.
+```shell
+docker run --rm -d -p 9080:80 -p 9443:443 --network frontend \
+--env TZ='EAST+5EDT,M3.2.0/2,M11.1.0/2' \
+--env TIMEZONE='America/New_York' --name web php8_nginx
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/ddella/Caddy_Proxy/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - daniel@isociel.com
 
 Project Link: [https://github.com/ddella/Caddy_Proxy](https://github.com/ddella/Caddy_Proxy)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ACKNOWLEDGMENTS -->
@@ -216,15 +230,15 @@ Project Link: [https://github.com/ddella/Caddy_Proxy](https://github.com/ddella/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/ddella/Caddy_Proxy.svg?style=for-the-badge
 [contributors-url]: https://github.com/ddella/Caddy_Proxy/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/ddella/Caddy_Proxy.svg?style=for-the-badge
 [forks-url]: https://github.com/ddella/Caddy_Proxy/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/ddella/Caddy_Proxy.svg?style=for-the-badge
 [stars-url]: https://github.com/ddella/Caddy_Proxy/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/ddella/Caddy_Proxy.svg?style=for-the-badge
 [issues-url]: https://github.com/ddella/Caddy_Proxy/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/ddella/Caddy_Proxy.svg?style=for-the-badge
 [license-url]: https://github.com/ddella/Caddy_Proxy/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/linkedin_username
