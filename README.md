@@ -117,13 +117,13 @@ This example is for educational purposes **ONLY**. It shows different scenarios 
 - `TCP/8080` on Docker host is mapped to `TCP/80` on the **caddy** container
 - `TCP/8443` on Docker host is mapped to `TCP/443` on the **caddy** container
 
-So far it's pretty boring and there's nothing special here.  
+What we did above is pretty boring and there's nothing special. The fun starts below 😀  
 
-- `TCP/2080` on Docker host is mapped to `TCP/2080` on the **caddy** container, which reverse proxy to the **web** container `TCP/80`
-- `TCP/3080` on Docker host is mapped to `TCP/3080` on the **caddy** container, which reverse proxy to an external server `TCP/80`
-- `TCP/4080` on Docker host is mapped to `TCP/4080` on the **caddy** container, which reverse proxy to the Docker host `TCP/80`
+- `TCP/2080` on Docker host is mapped to `TCP/2080` on the **caddy** container, which reverse proxy to the **web** container on `TCP/80`.
+- `TCP/3080` on Docker host is mapped to `TCP/3080` on the **caddy** container, which reverse proxy to an external server on `TCP/80`.
+- `TCP/4080` on Docker host is mapped to `TCP/4080` on the **caddy** container, which reverse proxy on the Docker host `TCP/80`.
 
-This last two are the most interesting. It shows that you could give access to an external partner at a Docker container that will redirect the traffic to another server. 
+The last two are the most interesting. It shows that you could give access to an external partner in a Docker container and the traffic can be redirected to another internal server.
 ### Installation
 
 1. get the official Caddy container for Docker Hub
