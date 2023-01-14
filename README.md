@@ -102,11 +102,11 @@ I needed a container with a small web server. I used a container that I had buil
 ![Diagram](images/design.jpg)
 
 - I run a Docker container called **web** for a simple web server.
-  - It listens to `TCP/80` and `TCP/443`
+  - It listens on `TCP/80` and `TCP/443`
 - I run a Docker container called **caddy** for the reverse proxy.
-  - It listens to `TCP/80`, `TCP/443`, `TCP/2080`, `TCP/4080` and `TCP/3080`
-- I also run an external Apache web server on the Docker host.
-  - It listens to `TCP/80`
+  - It listens on `TCP/80`, `TCP/443`, `TCP/2080`, `TCP/4080` and `TCP/3080`
+- I also run an Apache web server on the Docker host which is a macOS.
+  - It listens on `TCP/80`
 
 ### Traffic flow
 This example is for educational purposes **ONLY**. It shows different scenarios where you want to use a reverse proxy.  
