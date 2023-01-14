@@ -4,4 +4,4 @@
 .env
 00_Readme.txt
 caddy.json
-diagram.pptx
+*.pptx
