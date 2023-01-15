@@ -177,6 +177,10 @@ docker run --rm -d -p 8080:80 -p 2080:2080 -p 3080:3080 -p 4080:4080 \
 --network frontend \
 caddy
 ```
+>`$PWD/index.html` is a `bind mount`  
+>`$PWD/Caddyfile` is a `bind mount`  
+>`caddy_data` is a `volume`  
+
 2. ### Start a simple web server to test the reverse proxy of Caddy
 This could be any container with a web server. I happened to have one with Nginx and PHP8.
 ```shell
@@ -209,6 +213,11 @@ http://localhost:4080/
 Output:  
 ![](images/localhost-4080.jpg)
 
+4. ### Troubleshoot
+Use this command to jump inside the container:
+```shell
+docker exec -it caddy /bin/sh
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
