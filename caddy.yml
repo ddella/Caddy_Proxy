@@ -1,0 +1,51 @@
+# version: '3'
+# https://github.com/compose-spec/compose-spec/blob/master/spec.md
+#
+# How to START the container:
+#   docker compose -f caddy.yml up -d
+# How to STOP the container:
+#   docker compose -f caddy.yml rm -s -f
+# How to terminate all the containers (if you spinned > 1):
+#   docker rm -f $(docker container ls -q -f "name=caddy[0-4]")
+#
+version: "3.8"
+networks:
+   frontend:
+      name: frontend
+services:
+  caddy:
+    hostname: caddy
+    container_name: caddy
+    image: caddy:latest
+    # restart: unless-stopped
+    restart: "no"
+    ports:
+      - "8080:80"
+      - "2080:2080"
+      - "3080:3080"
+      - "4080:4080"
+      - "8443:443"
+      - "8443:443/udp"
+    volumes:
+      - type: bind
+        source: $PWD/index.html
+        target: /usr/share/caddy/index.html
+      - type: bind
+        source: $PWD/Caddyfile
+        target: /etc/caddy/Caddyfile
+      - type: bind
+        source: $PWD/site
+        target: /srv
+      - type: volume
+        source: caddy_data
+        target: /data
+      - type: volume
+        source: caddy_config
+        target: /config
+    networks:
+      frontend:
+
+volumes:
+  caddy_data:
+    external: true
+  caddy_config:

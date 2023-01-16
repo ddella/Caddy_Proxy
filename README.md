@@ -181,7 +181,9 @@ caddy
 >`$PWD/Caddyfile` is a `bind mount`  
 >`caddy_data` is a `volume`  
 
-2. ### Start a simple web server to test the reverse proxy of Caddy
+If you prefer a `YAML` file, try [caddy.yml](caddy.yml)
+
+1. ### Start a simple web server to test the reverse proxy of Caddy
 This could be any container with a web server. I happened to have one with Nginx and PHP8.
 ```shell
 docker run --rm -d -p 9080:80 -p 9443:443 --network frontend \
@@ -189,7 +191,7 @@ docker run --rm -d -p 9080:80 -p 9443:443 --network frontend \
 --env TIMEZONE='America/New_York' --name web php8_nginx
 ```
 
-3. ### Tests
+1. ### Tests
 Test from the Docker host on web server. It's a simple Docker host to Docker container mapping. Nothing special here:
 ```
 http://localhost:9080/
