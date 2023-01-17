@@ -221,6 +221,16 @@ Use this command to jump inside the container:
 docker exec -it caddy /bin/sh
 ```
 
+5. ### Automatic TLS with the Caddy image
+The default `Caddyfile` only listens to port 80, and does not set up automatic TLS. However, if you have a domain name for your site, and its A/AAAA DNS records are properly pointed to this machine's public IP, then you can use this command to simply serve a site over HTTPS:  
+```shell
+docker run -d -p 8080:80 -p 8443:443 -p 8443:443/udp \
+-v caddy_data:/data \
+-v caddy_config:/config \
+caddy caddy file-server --domain example.com
+```
+>The key here is that Caddy is able to listen to ports `80` and `443`, **both required** for the ACME HTTP challenge.  
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->

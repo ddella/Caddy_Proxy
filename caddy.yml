@@ -39,12 +39,14 @@ services:
       - type: volume
         source: caddy_data
         target: /data
-      - type: volume
-        source: caddy_config
-        target: /config
+#      - type: volume
+#        source: caddy_config
+#        target: /config
     networks:
       frontend:
 
+# You may need to create it manually using:
+# docker volume create [project-name]_caddy_data
 volumes:
   caddy_data:
     external: true
